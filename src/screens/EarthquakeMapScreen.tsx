@@ -200,6 +200,7 @@ export const EarthquakeMapScreen = (): ReactElement => {
   );
 
   const activeCountryLabel = manualCountry?.name ?? countryLabel;
+  const changeLabel = isSelectingCountry ? "Close" : "Change";
 
   const handleOpenCountrySelector = useCallback(() => {
     setIsSelectingCountry((previous) => !previous);
@@ -262,7 +263,7 @@ export const EarthquakeMapScreen = (): ReactElement => {
               Showing earthquakes in and around {activeCountryLabel}
             </Text>
             <Pressable onPress={handleOpenCountrySelector}>
-              <Text style={styles.changeText}>Change</Text>
+              <Text style={styles.changeText}>{changeLabel}</Text>
             </Pressable>
           </View>
         ) : null}
