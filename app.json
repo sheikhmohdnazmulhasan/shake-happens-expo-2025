@@ -28,7 +28,7 @@
       "package": "com.sheikhmohdnazmulhasan.shakehappensexpo2025",
       "config": {
         "googleMaps": {
-          "apiKey": "AIzaSyCGYwarV1r9FE_QhBXvvv1r0XwpMAAGOmM"
+          "apiKey": "GOOGLEMAPSAPIKEY"
         }
       }
     },
