@@ -21,6 +21,12 @@ const DEFAULT_LOOKBACK_DAYS = 365;
 type UseEarthquakesPollingArgs = {
   pollIntervalMs?: number;
   minMagnitude?: number;
+  boundingBox?: {
+    minLatitude: number;
+    maxLatitude: number;
+    minLongitude: number;
+    maxLongitude: number;
+  };
 };
 
 type UseEarthquakesPollingResult = {
@@ -42,6 +48,7 @@ const getStartDateIso = (lookbackDays: number): string => {
 export const useEarthquakesPolling = ({
   pollIntervalMs,
   minMagnitude,
+  boundingBox,
 }: UseEarthquakesPollingArgs = {}): UseEarthquakesPollingResult => {
   const { defaultPollIntervalMs } = getAppConfig();
   const effectiveInterval = pollIntervalMs ?? defaultPollIntervalMs;
@@ -83,6 +90,7 @@ export const useEarthquakesPolling = ({
         minMagnitude,
         limit: 500,
         startTimeIso: getStartDateIso(DEFAULT_LOOKBACK_DAYS),
+        boundingBox,
       });
       setEarthquakes(data);
       setLastUpdatedAt(new Date());

@@ -10,6 +10,7 @@ import MapView, { Marker, type Region } from "react-native-maps";
 import { getAppConfig } from "../config/appConfig";
 import { useEarthquakesPolling } from "../hooks/useEarthquakesPolling";
 import { EarthquakeList } from "../components/EarthquakeList";
+import { useUserLocationRegion } from "../hooks/useUserLocationRegion";
 
 const LOADING_LABEL = "Loading earthquakes...";
 
@@ -17,17 +18,40 @@ export const EarthquakeMapScreen = (): ReactElement => {
   const { mapDefaultLatitude, mapDefaultLongitude, mapDefaultZoomDelta } =
     getAppConfig();
 
-  const { earthquakes, isLoading, errorMessage } = useEarthquakesPolling({});
+  const {
+    isLoading: isLocationLoading,
+    errorMessage: locationErrorMessage,
+    countryLabel,
+    centerLatitude,
+    centerLongitude,
+    boundingBox,
+  } = useUserLocationRegion({});
 
-  const initialRegion: Region = useMemo(
-    () => ({
-      latitude: mapDefaultLatitude,
-      longitude: mapDefaultLongitude,
+  const {
+    earthquakes,
+    isLoading: isEarthquakesLoading,
+    errorMessage: earthquakesErrorMessage,
+  } = useEarthquakesPolling({
+    boundingBox: boundingBox ?? undefined,
+  });
+
+  const initialRegion: Region = useMemo(() => {
+    const latitude = centerLatitude ?? mapDefaultLatitude;
+    const longitude = centerLongitude ?? mapDefaultLongitude;
+
+    return {
+      latitude,
+      longitude,
       latitudeDelta: mapDefaultZoomDelta,
       longitudeDelta: mapDefaultZoomDelta,
-    }),
-    [mapDefaultLatitude, mapDefaultLongitude, mapDefaultZoomDelta]
-  );
+    };
+  }, [
+    centerLatitude,
+    centerLongitude,
+    mapDefaultLatitude,
+    mapDefaultLongitude,
+    mapDefaultZoomDelta,
+  ]);
 
   return (
     <View style={styles.container}>
@@ -52,19 +76,28 @@ export const EarthquakeMapScreen = (): ReactElement => {
       </View>
 
       <View style={styles.listContainer}>
+        {countryLabel ? (
+          <View style={styles.regionHeader}>
+            <Text style={styles.regionHeaderText}>
+              Showing earthquakes near {countryLabel}
+            </Text>
+          </View>
+        ) : null}
         <EarthquakeList earthquakes={earthquakes} />
       </View>
 
-      {isLoading ? (
+      {isEarthquakesLoading || isLocationLoading ? (
         <View style={styles.loadingOverlay}>
           <ActivityIndicator size="large" />
           <Text style={styles.loadingText}>{LOADING_LABEL}</Text>
         </View>
       ) : null}
 
-      {errorMessage ? (
+      {earthquakesErrorMessage || locationErrorMessage ? (
         <View style={styles.errorBanner}>
-          <Text style={styles.errorText}>{errorMessage}</Text>
+          <Text style={styles.errorText}>
+            {earthquakesErrorMessage ?? locationErrorMessage}
+          </Text>
         </View>
       ) : null}
     </View>
@@ -86,6 +119,17 @@ const styles = StyleSheet.create({
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: "#ddd",
     backgroundColor: "#fff",
+  },
+  regionHeader: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: "#eee",
+    backgroundColor: "#fafafa",
+  },
+  regionHeaderText: {
+    fontSize: 12,
+    color: "#555",
   },
   loadingOverlay: {
     position: "absolute",

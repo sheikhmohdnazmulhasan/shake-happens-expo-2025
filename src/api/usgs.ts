@@ -21,6 +21,12 @@ type FetchEarthquakesArgs = {
   limit?: number;
   startTimeIso?: string;
   endTimeIso?: string;
+  boundingBox?: {
+    minLatitude: number;
+    maxLatitude: number;
+    minLongitude: number;
+    maxLongitude: number;
+  };
 };
 
 const mapFeatureToEarthquake = (feature: UsgsEarthquakeFeature): Earthquake => {
@@ -42,6 +48,7 @@ export const fetchEarthquakes = async ({
   limit = 200,
   startTimeIso,
   endTimeIso,
+  boundingBox,
 }: FetchEarthquakesArgs = {}): Promise<Earthquake[]> => {
   const { usgsApiBaseUrl, defaultMinMagnitude, bangladeshBoundingBox } =
     getAppConfig();
@@ -53,11 +60,17 @@ export const fetchEarthquakes = async ({
     minmagnitude: String(minMagnitude ?? defaultMinMagnitude),
   });
 
-  // Restrict results to the Bangladesh region using a bounding box.
-  params.append("minlatitude", String(bangladeshBoundingBox.minLatitude));
-  params.append("maxlatitude", String(bangladeshBoundingBox.maxLatitude));
-  params.append("minlongitude", String(bangladeshBoundingBox.minLongitude));
-  params.append("maxlongitude", String(bangladeshBoundingBox.maxLongitude));
+  const effectiveBoundingBox = boundingBox ?? {
+    minLatitude: bangladeshBoundingBox.minLatitude,
+    maxLatitude: bangladeshBoundingBox.maxLatitude,
+    minLongitude: bangladeshBoundingBox.minLongitude,
+    maxLongitude: bangladeshBoundingBox.maxLongitude,
+  };
+
+  params.append("minlatitude", String(effectiveBoundingBox.minLatitude));
+  params.append("maxlatitude", String(effectiveBoundingBox.maxLatitude));
+  params.append("minlongitude", String(effectiveBoundingBox.minLongitude));
+  params.append("maxlongitude", String(effectiveBoundingBox.maxLongitude));
 
   if (startTimeIso) {
     params.append("starttime", startTimeIso);

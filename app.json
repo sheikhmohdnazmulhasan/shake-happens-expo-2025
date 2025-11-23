@@ -13,7 +13,10 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Shake Happens uses your location to prioritize earthquakes near your country."
+      }
     },
     "android": {
       "adaptiveIcon": {
