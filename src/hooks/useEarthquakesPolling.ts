@@ -62,20 +62,6 @@ export const useEarthquakesPolling = ({
   const backoffMsRef = useRef<number | null>(null);
   const timeoutIdRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const scheduleNextPoll = useCallback(
-    (delayMs: number): void => {
-      if (timeoutIdRef.current) {
-        clearTimeout(timeoutIdRef.current);
-      }
-
-      timeoutIdRef.current = setTimeout(() => {
-        void performFetch();
-      }, delayMs);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
-
   const performFetch = useCallback(async (): Promise<void> => {
     if (isRequestInFlightRef.current) {
       return;
@@ -111,7 +97,17 @@ export const useEarthquakesPolling = ({
       isRequestInFlightRef.current = false;
       setIsLoading(false);
     }
-  }, [effectiveInterval, minMagnitude, scheduleNextPoll]);
+  }, [effectiveInterval, minMagnitude, boundingBox]);
+
+  const scheduleNextPoll = (delayMs: number): void => {
+    if (timeoutIdRef.current) {
+      clearTimeout(timeoutIdRef.current);
+    }
+
+    timeoutIdRef.current = setTimeout(() => {
+      void performFetch();
+    }, delayMs);
+  };
 
   const refresh = useCallback(async (): Promise<void> => {
     await performFetch();
