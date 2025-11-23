@@ -25,7 +25,12 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.sheikhmohdnazmulhasan.shakehappensexpo2025"
+      "package": "com.sheikhmohdnazmulhasan.shakehappensexpo2025",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyCGYwarV1r9FE_QhBXvvv1r0XwpMAAGOmM"
+        }
+      }
     },
     "web": {
       "favicon": "./assets/favicon.png"
