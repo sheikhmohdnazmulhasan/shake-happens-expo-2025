@@ -17,7 +17,6 @@ import {
   Pressable,
   StyleSheet,
   Text,
-  TextInput,
   View,
   type ListRenderItem,
 } from "react-native";
@@ -25,7 +24,6 @@ import type { CountryOption } from "../models/country";
 import { fetchCountries } from "../api/countries";
 import { useAppTheme } from "../hooks/useAppTheme";
 
-const SEARCH_PLACEHOLDER = "Search country";
 const TITLE_LABEL = "Select a country";
 const CANCEL_LABEL = "Close";
 const LOAD_FAILED_MESSAGE =
@@ -45,7 +43,6 @@ export const CountrySelector = ({
   const [countries, setCountries] = useState<CountryOption[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState<string>("");
 
   useEffect(() => {
     let isCancelled = false;
@@ -104,17 +101,6 @@ export const CountrySelector = ({
           fontWeight: "500",
           color: colors.secondaryText,
         },
-        searchInput: {
-          marginHorizontal: 12,
-          marginVertical: 8,
-          paddingHorizontal: 10,
-          paddingVertical: 8,
-          borderRadius: 6,
-          borderWidth: StyleSheet.hairlineWidth,
-          borderColor: colors.border,
-          color: colors.primaryText,
-          backgroundColor: colors.surfaceAlt,
-        },
         listContent: {
           paddingBottom: 8,
         },
@@ -153,18 +139,6 @@ export const CountrySelector = ({
       }),
     [colors]
   );
-
-  const filteredCountries = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase();
-
-    if (!query) {
-      return countries;
-    }
-
-    return countries.filter((country) =>
-      country.name.toLowerCase().includes(query)
-    );
-  }, [countries, searchQuery]);
 
   const keyExtractor = useCallback(
     (item: CountryOption): string => item.code,
@@ -211,16 +185,8 @@ export const CountrySelector = ({
         </Pressable>
       </View>
 
-      <TextInput
-        style={styles.searchInput}
-        value={searchQuery}
-        placeholder={SEARCH_PLACEHOLDER}
-        placeholderTextColor={colors.secondaryText}
-        onChangeText={setSearchQuery}
-      />
-
       <FlatList
-        data={filteredCountries}
+        data={countries}
         keyExtractor={keyExtractor}
         renderItem={renderItem}
         contentContainerStyle={styles.listContent}
