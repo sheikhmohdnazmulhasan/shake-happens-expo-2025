@@ -52,15 +52,19 @@ const getMagnitudeColor = (magnitude: number | null): string => {
 
 type EarthquakeListProps = {
   earthquakes: Earthquake[];
+  selectedEarthquakeId?: string | null;
+  onSelectEarthquake?: (earthquake: Earthquake) => void;
 };
 
 type EarthquakeListItemProps = {
   earthquake: Earthquake;
+  isSelected: boolean;
   onPress?: (earthquake: Earthquake) => void;
 };
 
 const EarthquakeListItem = ({
   earthquake,
+  isSelected,
   onPress,
 }: EarthquakeListItemProps): ReactElement => {
   const magnitudeLabel =
@@ -75,7 +79,11 @@ const EarthquakeListItem = ({
   return (
     <Pressable
       onPress={onPress ? () => onPress(earthquake) : undefined}
-      style={styles.itemContainer}
+      style={({ pressed }) => [
+        styles.itemContainer,
+        isSelected && styles.itemSelected,
+        pressed && styles.itemPressed,
+      ]}
     >
       <View style={styles.itemHeaderRow}>
         <Text style={styles.itemTitle} numberOfLines={1}>
@@ -92,17 +100,20 @@ const EarthquakeListItem = ({
 
 const EarthquakeListComponent = ({
   earthquakes,
+  selectedEarthquakeId,
   onSelectEarthquake,
-}: EarthquakeListProps & {
-  onSelectEarthquake?: (earthquake: Earthquake) => void;
-}): ReactElement => {
+}: EarthquakeListProps): ReactElement => {
   const keyExtractor = useCallback((item: Earthquake): string => item.id, []);
 
   const renderItem = useCallback<ListRenderItem<Earthquake>>(
     ({ item }) => (
-      <EarthquakeListItem earthquake={item} onPress={onSelectEarthquake} />
+      <EarthquakeListItem
+        earthquake={item}
+        isSelected={item.id === selectedEarthquakeId}
+        onPress={onSelectEarthquake}
+      />
     ),
-    [onSelectEarthquake]
+    [onSelectEarthquake, selectedEarthquakeId]
   );
 
   const renderEmptyComponent = useCallback((): ReactNode => {
@@ -130,7 +141,6 @@ export const EarthquakeList = memo(EarthquakeListComponent);
 
 const styles = StyleSheet.create({
   listContent: {
-    paddingHorizontal: 12,
     paddingVertical: 8,
   },
   emptyListContent: {
@@ -141,9 +151,16 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   itemContainer: {
+    paddingHorizontal: 12,
     paddingVertical: 8,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: "#ddd",
+  },
+  itemSelected: {
+    backgroundColor: "#eef6ff",
+  },
+  itemPressed: {
+    opacity: 0.8,
   },
   itemHeaderRow: {
     flexDirection: "row",

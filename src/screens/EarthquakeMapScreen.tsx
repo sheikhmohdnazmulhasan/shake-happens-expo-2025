@@ -4,19 +4,30 @@
  * Top-level screen that renders a map and displays earthquakes as markers.
  * Uses the polling hook to keep data up to date with the USGS API.
  */
-import React, { useMemo, useRef, useCallback, type ReactElement } from "react";
+import React, {
+  useMemo,
+  useRef,
+  useCallback,
+  useState,
+  type ReactElement,
+} from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import MapView, { Marker, type Region } from "react-native-maps";
 import { getAppConfig } from "../config/appConfig";
 import { useEarthquakesPolling } from "../hooks/useEarthquakesPolling";
 import { EarthquakeList } from "../components/EarthquakeList";
 import { useUserLocationRegion } from "../hooks/useUserLocationRegion";
+import type { Earthquake } from "../models/earthquakes";
 
 const LOADING_LABEL = "Loading earthquakes...";
 
 export const EarthquakeMapScreen = (): ReactElement => {
   const { mapDefaultLatitude, mapDefaultLongitude, mapDefaultZoomDelta } =
     getAppConfig();
+
+  const [selectedEarthquakeId, setSelectedEarthquakeId] = useState<
+    string | null
+  >(null);
 
   const {
     isLoading: isLocationLoading,
@@ -36,6 +47,7 @@ export const EarthquakeMapScreen = (): ReactElement => {
   });
 
   const mapRef = useRef<MapView | null>(null);
+  const isProgrammaticMoveRef = useRef<boolean>(false);
 
   const initialRegion: Region = useMemo(() => {
     const latitude = centerLatitude ?? mapDefaultLatitude;
@@ -56,7 +68,7 @@ export const EarthquakeMapScreen = (): ReactElement => {
   ]);
 
   const handleSelectEarthquake = useCallback(
-    (quake: { latitude: number; longitude: number }) => {
+    (quake: Earthquake) => {
       if (!mapRef.current) {
         return;
       }
@@ -64,6 +76,9 @@ export const EarthquakeMapScreen = (): ReactElement => {
       if (quake.latitude == null || quake.longitude == null) {
         return;
       }
+
+      setSelectedEarthquakeId(quake.id);
+      isProgrammaticMoveRef.current = true;
 
       mapRef.current.animateToRegion(
         {
@@ -78,10 +93,26 @@ export const EarthquakeMapScreen = (): ReactElement => {
     [mapDefaultZoomDelta]
   );
 
+  const handleRegionChangeComplete = useCallback(() => {
+    if (isProgrammaticMoveRef.current) {
+      isProgrammaticMoveRef.current = false;
+      return;
+    }
+
+    if (selectedEarthquakeId != null) {
+      setSelectedEarthquakeId(null);
+    }
+  }, [selectedEarthquakeId]);
+
   return (
     <View style={styles.container}>
       <View style={styles.mapContainer}>
-        <MapView ref={mapRef} style={styles.map} initialRegion={initialRegion}>
+        <MapView
+          ref={mapRef}
+          style={styles.map}
+          initialRegion={initialRegion}
+          onRegionChangeComplete={handleRegionChangeComplete}
+        >
           {earthquakes.map((quake) => (
             <Marker
               key={quake.id}
@@ -110,6 +141,7 @@ export const EarthquakeMapScreen = (): ReactElement => {
         ) : null}
         <EarthquakeList
           earthquakes={earthquakes}
+          selectedEarthquakeId={selectedEarthquakeId}
           onSelectEarthquake={handleSelectEarthquake}
         />
       </View>
