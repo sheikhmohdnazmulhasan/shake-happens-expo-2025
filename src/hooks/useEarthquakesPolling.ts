@@ -16,6 +16,7 @@ const REFRESH_FAILED_MESSAGE =
   "Unable to refresh earthquakes. Please check your connection.";
 const MAX_BACKOFF_MS = 5 * 60_000;
 const INITIAL_BACKOFF_MS = 5_000;
+const DEFAULT_LOOKBACK_DAYS = 365;
 
 type UseEarthquakesPollingArgs = {
   pollIntervalMs?: number;
@@ -28,6 +29,14 @@ type UseEarthquakesPollingResult = {
   errorMessage: string | null;
   lastUpdatedAt: Date | null;
   refresh: () => Promise<void>;
+};
+
+const getStartDateIso = (lookbackDays: number): string => {
+  const now = new Date();
+  const past = new Date(now.getTime() - lookbackDays * 24 * 60 * 60 * 1000);
+
+  // USGS accepts YYYY-MM-DD format.
+  return past.toISOString().slice(0, 10);
 };
 
 export const useEarthquakesPolling = ({
@@ -70,7 +79,11 @@ export const useEarthquakesPolling = ({
     setErrorMessage(null);
 
     try {
-      const data = await fetchEarthquakes({ minMagnitude });
+      const data = await fetchEarthquakes({
+        minMagnitude,
+        limit: 500,
+        startTimeIso: getStartDateIso(DEFAULT_LOOKBACK_DAYS),
+      });
       setEarthquakes(data);
       setLastUpdatedAt(new Date());
       backoffMsRef.current = null;

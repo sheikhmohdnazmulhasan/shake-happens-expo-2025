@@ -21,6 +21,33 @@ import type { Earthquake } from "../models/earthquakes";
 import { formatLocalDateTime } from "../utils/dateTime";
 
 const NO_EARTHQUAKES_LABEL = "No recent earthquakes detected in Bangladesh.";
+const UNKNOWN_MAGNITUDE_LABEL = "M N/A";
+
+/**
+ * Returns a color representing the severity of a magnitude.
+ *
+ * The goal is to give a quick visual signal without overwhelming
+ * the list with too many colors.
+ */
+const getMagnitudeColor = (magnitude: number | null): string => {
+  if (magnitude == null) {
+    return "#666666";
+  }
+
+  if (magnitude >= 6) {
+    return "#b71c1c"; // strong - dark red
+  }
+
+  if (magnitude >= 4) {
+    return "#e65100"; // moderate - orange
+  }
+
+  if (magnitude >= 2) {
+    return "#f9a825"; // light - yellow-ish
+  }
+
+  return "#2e7d32"; // very small - green
+};
 
 type EarthquakeListProps = {
   earthquakes: Earthquake[];
@@ -36,7 +63,9 @@ const EarthquakeListItem = ({
   const magnitudeLabel =
     earthquake.magnitude != null
       ? `M ${earthquake.magnitude.toFixed(1)}`
-      : "M N/A";
+      : UNKNOWN_MAGNITUDE_LABEL;
+
+  const magnitudeColor = getMagnitudeColor(earthquake.magnitude);
 
   const timeLabel = formatLocalDateTime(earthquake.occurredAt);
 
@@ -46,7 +75,9 @@ const EarthquakeListItem = ({
         <Text style={styles.itemTitle} numberOfLines={1}>
           {earthquake.place}
         </Text>
-        <Text style={styles.itemMagnitude}>{magnitudeLabel}</Text>
+        <Text style={[styles.itemMagnitude, { color: magnitudeColor }]}>
+          {magnitudeLabel}
+        </Text>
       </View>
       <Text style={styles.itemTime}>{timeLabel}</Text>
     </View>
