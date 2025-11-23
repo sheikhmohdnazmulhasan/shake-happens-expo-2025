@@ -11,17 +11,12 @@ import { getAppConfig } from "../config/appConfig";
 import { useEarthquakesPolling } from "../hooks/useEarthquakesPolling";
 import { EarthquakeList } from "../components/EarthquakeList";
 import { useUserLocationRegion } from "../hooks/useUserLocationRegion";
-import { useRegisterEarthquakeAlerts } from "../hooks/useRegisterEarthquakeAlerts";
 
 const LOADING_LABEL = "Loading earthquakes...";
 
 export const EarthquakeMapScreen = (): ReactElement => {
-  const {
-    mapDefaultLatitude,
-    mapDefaultLongitude,
-    mapDefaultZoomDelta,
-    defaultMinMagnitude,
-  } = getAppConfig();
+  const { mapDefaultLatitude, mapDefaultLongitude, mapDefaultZoomDelta } =
+    getAppConfig();
 
   const {
     isLoading: isLocationLoading,
@@ -31,12 +26,6 @@ export const EarthquakeMapScreen = (): ReactElement => {
     centerLongitude,
     boundingBox,
   } = useUserLocationRegion({});
-
-  useRegisterEarthquakeAlerts({
-    countryLabel,
-    boundingBox,
-    minMagnitude: defaultMinMagnitude,
-  });
 
   const {
     earthquakes,

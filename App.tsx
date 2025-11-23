@@ -6,18 +6,7 @@
  */
 import React, { type ReactElement } from "react";
 import { SafeAreaView, StatusBar, StyleSheet } from "react-native";
-import * as Notifications from "expo-notifications";
 import { EarthquakeMapScreen } from "./src/screens/EarthquakeMapScreen";
-
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-});
 
 const App = (): ReactElement => {
   return (
