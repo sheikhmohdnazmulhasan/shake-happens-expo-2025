@@ -2,20 +2,19 @@
  * Polling hook for fetching earthquakes from the USGS API.
  *
  * This hook encapsulates:
- * - periodic polling with a configurable interval,
- * - basic exponential backoff on repeated failures,
+ * - fetching earthquakes for a given region (bounding box),
+ * - refetching when parameters change,
  * - controlled loading and error state for the UI.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { fetchEarthquakes } from "../api/usgs";
 import { getAppConfig } from "../config/appConfig";
 import type { Earthquake } from "../models/earthquakes";
-import { logError } from "../utils/logger";
+import { logError, logInfo } from "../utils/logger";
 
 const REFRESH_FAILED_MESSAGE =
   "Unable to refresh earthquakes. Please check your connection.";
-const MAX_BACKOFF_MS = 5 * 60_000;
-const INITIAL_BACKOFF_MS = 5_000;
+const POLLING_START_MESSAGE = "Refetching earthquakes (useEarthquakesPolling)";
 const DEFAULT_LOOKBACK_DAYS = 365;
 
 type UseEarthquakesPollingArgs = {
@@ -52,15 +51,14 @@ export const useEarthquakesPolling = ({
 }: UseEarthquakesPollingArgs = {}): UseEarthquakesPollingResult => {
   const { defaultPollIntervalMs } = getAppConfig();
   const effectiveInterval = pollIntervalMs ?? defaultPollIntervalMs;
-
   const [earthquakes, setEarthquakes] = useState<Earthquake[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [lastUpdatedAt, setLastUpdatedAt] = useState<Date | null>(null);
 
   const isRequestInFlightRef = useRef<boolean>(false);
-  const backoffMsRef = useRef<number | null>(null);
-  const timeoutIdRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastParamsRef = useRef<string | null>(null);
+  const intervalIdRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const performFetch = useCallback(async (): Promise<void> => {
     if (isRequestInFlightRef.current) {
@@ -68,46 +66,42 @@ export const useEarthquakesPolling = ({
     }
 
     isRequestInFlightRef.current = true;
+    logInfo(POLLING_START_MESSAGE, {
+      minMagnitude,
+      boundingBox,
+    });
     setIsLoading(true);
     setErrorMessage(null);
 
     try {
+      const paramsKey = JSON.stringify({
+        minMagnitude,
+        boundingBox,
+      });
+
+      lastParamsRef.current = paramsKey;
+
       const data = await fetchEarthquakes({
         minMagnitude,
         limit: 500,
         startTimeIso: getStartDateIso(DEFAULT_LOOKBACK_DAYS),
         boundingBox,
       });
-      setEarthquakes(data);
-      setLastUpdatedAt(new Date());
-      backoffMsRef.current = null;
-      scheduleNextPoll(effectiveInterval);
+
+      // Only update state if the parameters haven't changed while the
+      // request was in flight.
+      if (lastParamsRef.current === paramsKey) {
+        setEarthquakes(data);
+        setLastUpdatedAt(new Date());
+      }
     } catch (error) {
       logError("Polling error in useEarthquakesPolling", error);
       setErrorMessage(REFRESH_FAILED_MESSAGE);
-
-      const currentBackoff =
-        backoffMsRef.current == null
-          ? INITIAL_BACKOFF_MS
-          : Math.min(backoffMsRef.current * 2, MAX_BACKOFF_MS);
-
-      backoffMsRef.current = currentBackoff;
-      scheduleNextPoll(currentBackoff);
     } finally {
       isRequestInFlightRef.current = false;
       setIsLoading(false);
     }
-  }, [effectiveInterval, minMagnitude, boundingBox]);
-
-  const scheduleNextPoll = (delayMs: number): void => {
-    if (timeoutIdRef.current) {
-      clearTimeout(timeoutIdRef.current);
-    }
-
-    timeoutIdRef.current = setTimeout(() => {
-      void performFetch();
-    }, delayMs);
-  };
+  }, [minMagnitude, boundingBox]);
 
   const refresh = useCallback(async (): Promise<void> => {
     await performFetch();
@@ -116,12 +110,21 @@ export const useEarthquakesPolling = ({
   useEffect(() => {
     void performFetch();
 
+    if (intervalIdRef.current) {
+      clearInterval(intervalIdRef.current);
+    }
+
+    intervalIdRef.current = setInterval(() => {
+      void performFetch();
+    }, effectiveInterval);
+
     return () => {
-      if (timeoutIdRef.current) {
-        clearTimeout(timeoutIdRef.current);
+      if (intervalIdRef.current) {
+        clearInterval(intervalIdRef.current);
+        intervalIdRef.current = null;
       }
     };
-  }, [performFetch]);
+  }, [performFetch, effectiveInterval]);
 
   return {
     earthquakes,

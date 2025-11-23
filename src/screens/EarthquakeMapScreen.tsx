@@ -51,12 +51,8 @@ export const EarthquakeMapScreen = (): ReactElement => {
     boundingBox,
   } = useUserLocationRegion({});
 
-  const {
-    earthquakes,
-    isLoading: isEarthquakesLoading,
-    errorMessage: earthquakesErrorMessage,
-  } = useEarthquakesPolling({
-    boundingBox:
+  const pollingBoundingBox = useMemo(
+    () =>
       manualCountry != null
         ? {
             minLatitude: manualCountry.latitude - 7,
@@ -65,6 +61,15 @@ export const EarthquakeMapScreen = (): ReactElement => {
             maxLongitude: manualCountry.longitude + 7,
           }
         : boundingBox ?? undefined,
+    [manualCountry, boundingBox]
+  );
+
+  const {
+    earthquakes,
+    isLoading: isEarthquakesLoading,
+    errorMessage: earthquakesErrorMessage,
+  } = useEarthquakesPolling({
+    boundingBox: pollingBoundingBox,
   });
 
   const mapRef = useRef<MapView | null>(null);
