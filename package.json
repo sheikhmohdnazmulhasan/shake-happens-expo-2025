@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "expo": "~54.0.25",
-    "expo-constants": "~16.0.2",
+    "expo-constants": "~18.0.10",
     "expo-location": "~19.0.7",
     "react": "19.1.0",
     "react-native": "0.81.5",
