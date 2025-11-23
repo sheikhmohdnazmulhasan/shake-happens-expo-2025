@@ -1,6 +1,6 @@
 ## Shake Happens
 
-Shake Happens is an Expo + React Native app scaffold that will track and visualize real-time earthquakes using the USGS Earthquake Catalog API.
+Shake Happens is an Expo + React Native app scaffold that will track and visualize real-time earthquakes using the USGS Earthquake Catalog API
 
 ### What this project uses
 
