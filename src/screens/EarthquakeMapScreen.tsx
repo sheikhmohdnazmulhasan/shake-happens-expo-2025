@@ -9,6 +9,7 @@ import React, {
   useRef,
   useCallback,
   useState,
+  useEffect,
   type ReactElement,
 } from "react";
 import {
@@ -74,6 +75,7 @@ export const EarthquakeMapScreen = (): ReactElement => {
 
   const mapRef = useRef<MapView | null>(null);
   const isProgrammaticMoveRef = useRef<boolean>(false);
+  const lastCenteredEarthquakeIdRef = useRef<string | null>(null);
 
   const initialRegion: Region = useMemo(() => {
     const latitude =
@@ -112,8 +114,8 @@ export const EarthquakeMapScreen = (): ReactElement => {
         {
           latitude: quake.latitude,
           longitude: quake.longitude,
-          latitudeDelta: mapDefaultZoomDelta / 5,
-          longitudeDelta: mapDefaultZoomDelta / 5,
+          latitudeDelta: mapDefaultZoomDelta / 8,
+          longitudeDelta: mapDefaultZoomDelta / 8,
         },
         500
       );
@@ -233,6 +235,35 @@ export const EarthquakeMapScreen = (): ReactElement => {
     },
     [mapDefaultZoomDelta]
   );
+
+  useEffect(() => {
+    if (!mapRef.current || earthquakes.length === 0) {
+      return;
+    }
+
+    const mostRecent = earthquakes[0];
+
+    if (mostRecent.latitude == null || mostRecent.longitude == null) {
+      return;
+    }
+
+    if (lastCenteredEarthquakeIdRef.current === mostRecent.id) {
+      return;
+    }
+
+    lastCenteredEarthquakeIdRef.current = mostRecent.id;
+    isProgrammaticMoveRef.current = true;
+
+    mapRef.current.animateToRegion(
+      {
+        latitude: mostRecent.latitude,
+        longitude: mostRecent.longitude,
+        latitudeDelta: mapDefaultZoomDelta / 8,
+        longitudeDelta: mapDefaultZoomDelta / 8,
+      },
+      500
+    );
+  }, [earthquakes, mapDefaultZoomDelta]);
 
   return (
     <View style={styles.container}>
