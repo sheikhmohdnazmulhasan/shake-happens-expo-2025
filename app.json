@@ -28,6 +28,12 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "66a7706d-f194-4f58-a074-4c5f5d0f3772"
+      }
+    },
+    "owner": "sheikhmohdnazmulhasan"
   }
 }

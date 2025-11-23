@@ -7,12 +7,17 @@
 import { useEffect, useState } from "react";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
+import Constants from "expo-constants";
 import { logError } from "../utils/logger";
 
 const NOTIFICATIONS_UNSUPPORTED_MESSAGE =
   "Push notifications are not supported on this device.";
 const NOTIFICATIONS_PERMISSION_DENIED_MESSAGE =
   "Notification permissions were not granted.";
+const NOTIFICATIONS_EXPO_GO_MESSAGE =
+  "Push notifications are not supported in Expo Go. Please use a development build.";
+const NOTIFICATIONS_PROJECT_ID_MISSING_MESSAGE =
+  "Push notifications are not fully configured (missing projectId).";
 
 type UsePushNotificationsResult = {
   expoPushToken: string | null;
@@ -34,6 +39,14 @@ export const usePushNotifications = (): UsePushNotificationsResult => {
       try {
         setIsLoading(true);
         setErrorMessage(null);
+
+        if (Constants.executionEnvironment === "storeClient") {
+          if (!isCancelled) {
+            setIsSupported(false);
+            setErrorMessage(NOTIFICATIONS_EXPO_GO_MESSAGE);
+          }
+          return;
+        }
 
         if (!Device.isDevice) {
           if (!isCancelled) {
@@ -59,7 +72,23 @@ export const usePushNotifications = (): UsePushNotificationsResult => {
           return;
         }
 
-        const { data } = await Notifications.getExpoPushTokenAsync();
+        const projectId =
+          (
+            Constants.expoConfig?.extra as
+              | { eas?: { projectId?: string } }
+              | undefined
+          )?.eas?.projectId ?? Constants.easConfig?.projectId;
+
+        if (!projectId) {
+          if (!isCancelled) {
+            setErrorMessage(NOTIFICATIONS_PROJECT_ID_MISSING_MESSAGE);
+          }
+          return;
+        }
+
+        const { data } = await Notifications.getExpoPushTokenAsync({
+          projectId,
+        });
 
         if (!isCancelled) {
           setExpoPushToken(data);

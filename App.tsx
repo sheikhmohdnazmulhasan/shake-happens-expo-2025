@@ -5,8 +5,7 @@
  * to the screen layer so it remains easy to test and maintain.
  */
 import React, { type ReactElement } from "react";
-import { StatusBar } from "expo-status-bar";
-import { SafeAreaView, StyleSheet } from "react-native";
+import { SafeAreaView, StatusBar, StyleSheet } from "react-native";
 import * as Notifications from "expo-notifications";
 import { EarthquakeMapScreen } from "./src/screens/EarthquakeMapScreen";
 
@@ -23,7 +22,7 @@ Notifications.setNotificationHandler({
 const App = (): ReactElement => {
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar style="auto" />
+      <StatusBar barStyle="dark-content" />
       <EarthquakeMapScreen />
     </SafeAreaView>
   );
