@@ -11,13 +11,21 @@ import React, {
   useState,
   type ReactElement,
 } from "react";
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import MapView, { Marker, type Region } from "react-native-maps";
 import { getAppConfig } from "../config/appConfig";
 import { useEarthquakesPolling } from "../hooks/useEarthquakesPolling";
 import { EarthquakeList } from "../components/EarthquakeList";
+import { CountrySelector } from "../components/CountrySelector";
 import { useUserLocationRegion } from "../hooks/useUserLocationRegion";
 import type { Earthquake } from "../models/earthquakes";
+import type { CountryOption } from "../models/country";
 import { useAppTheme } from "../hooks/useAppTheme";
 
 const LOADING_LABEL = "Loading earthquakes...";
@@ -29,6 +37,10 @@ export const EarthquakeMapScreen = (): ReactElement => {
   const [selectedEarthquakeId, setSelectedEarthquakeId] = useState<
     string | null
   >(null);
+  const [isSelectingCountry, setIsSelectingCountry] = useState<boolean>(false);
+  const [manualCountry, setManualCountry] = useState<CountryOption | null>(
+    null
+  );
 
   const {
     isLoading: isLocationLoading,
@@ -44,15 +56,25 @@ export const EarthquakeMapScreen = (): ReactElement => {
     isLoading: isEarthquakesLoading,
     errorMessage: earthquakesErrorMessage,
   } = useEarthquakesPolling({
-    boundingBox: boundingBox ?? undefined,
+    boundingBox:
+      manualCountry != null
+        ? {
+            minLatitude: manualCountry.latitude - 7,
+            maxLatitude: manualCountry.latitude + 7,
+            minLongitude: manualCountry.longitude - 7,
+            maxLongitude: manualCountry.longitude + 7,
+          }
+        : boundingBox ?? undefined,
   });
 
   const mapRef = useRef<MapView | null>(null);
   const isProgrammaticMoveRef = useRef<boolean>(false);
 
   const initialRegion: Region = useMemo(() => {
-    const latitude = centerLatitude ?? mapDefaultLatitude;
-    const longitude = centerLongitude ?? mapDefaultLongitude;
+    const latitude =
+      manualCountry?.latitude ?? centerLatitude ?? mapDefaultLatitude;
+    const longitude =
+      manualCountry?.longitude ?? centerLongitude ?? mapDefaultLongitude;
 
     return {
       latitude,
@@ -131,10 +153,20 @@ export const EarthquakeMapScreen = (): ReactElement => {
           borderBottomWidth: StyleSheet.hairlineWidth,
           borderBottomColor: colors.border,
           backgroundColor: colors.surfaceAlt,
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
         },
         regionHeaderText: {
+          flex: 1,
           fontSize: 12,
           color: colors.secondaryText,
+        },
+        changeText: {
+          marginLeft: 8,
+          fontSize: 12,
+          fontWeight: "600",
+          color: colors.primaryText,
         },
         loadingOverlay: {
           position: "absolute",
@@ -167,6 +199,39 @@ export const EarthquakeMapScreen = (): ReactElement => {
     [colors]
   );
 
+  const activeCountryLabel = manualCountry?.name ?? countryLabel;
+
+  const handleOpenCountrySelector = useCallback(() => {
+    setIsSelectingCountry(true);
+  }, []);
+
+  const handleCountrySelected = useCallback(
+    (country: CountryOption) => {
+      setManualCountry(country);
+      setIsSelectingCountry(false);
+      setSelectedEarthquakeId(null);
+
+      if (!mapRef.current) {
+        return;
+      }
+
+      mapRef.current.animateToRegion(
+        {
+          latitude: country.latitude,
+          longitude: country.longitude,
+          latitudeDelta: mapDefaultZoomDelta,
+          longitudeDelta: mapDefaultZoomDelta,
+        },
+        500
+      );
+    },
+    [mapDefaultZoomDelta]
+  );
+
+  const handleCloseCountrySelector = useCallback(() => {
+    setIsSelectingCountry(false);
+  }, []);
+
   return (
     <View style={styles.container}>
       <View style={styles.mapContainer}>
@@ -195,18 +260,29 @@ export const EarthquakeMapScreen = (): ReactElement => {
       </View>
 
       <View style={styles.listContainer}>
-        {countryLabel ? (
+        {activeCountryLabel ? (
           <View style={styles.regionHeader}>
             <Text style={styles.regionHeaderText}>
-              Showing earthquakes in and around {countryLabel}
+              Showing earthquakes in and around {activeCountryLabel}
             </Text>
+            <Pressable onPress={handleOpenCountrySelector}>
+              <Text style={styles.changeText}>Change</Text>
+            </Pressable>
           </View>
         ) : null}
-        <EarthquakeList
-          earthquakes={earthquakes}
-          selectedEarthquakeId={selectedEarthquakeId}
-          onSelectEarthquake={handleSelectEarthquake}
-        />
+
+        {isSelectingCountry ? (
+          <CountrySelector
+            onSelectCountry={handleCountrySelected}
+            onCancel={handleCloseCountrySelector}
+          />
+        ) : (
+          <EarthquakeList
+            earthquakes={earthquakes}
+            selectedEarthquakeId={selectedEarthquakeId}
+            onSelectEarthquake={handleSelectEarthquake}
+          />
+        )}
       </View>
 
       {isEarthquakesLoading || isLocationLoading ? (
