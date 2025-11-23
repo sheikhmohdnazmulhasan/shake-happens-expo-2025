@@ -1,7 +1,7 @@
 /**
  * CountrySelector
  *
- * Renders a searchable list of countries and allows the user to pick
+ * Renders a simple list of countries and allows the user to pick
  * one to prioritize earthquakes for that country.
  */
 import React, {
@@ -24,19 +24,15 @@ import type { CountryOption } from "../models/country";
 import { fetchCountries } from "../api/countries";
 import { useAppTheme } from "../hooks/useAppTheme";
 
-const TITLE_LABEL = "Select a country";
-const CANCEL_LABEL = "Close";
 const LOAD_FAILED_MESSAGE =
   "Unable to load countries. Please check your connection.";
 
 type CountrySelectorProps = {
   onSelectCountry: (country: CountryOption) => void;
-  onCancel: () => void;
 };
 
 export const CountrySelector = ({
   onSelectCountry,
-  onCancel,
 }: CountrySelectorProps): ReactElement => {
   const { colors } = useAppTheme();
 
@@ -80,26 +76,6 @@ export const CountrySelector = ({
       StyleSheet.create({
         container: {
           flex: 1,
-        },
-        headerRow: {
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-          paddingHorizontal: 12,
-          paddingVertical: 8,
-          borderBottomWidth: StyleSheet.hairlineWidth,
-          borderBottomColor: colors.border,
-          backgroundColor: colors.surfaceAlt,
-        },
-        headerTitle: {
-          fontSize: 14,
-          fontWeight: "600",
-          color: colors.primaryText,
-        },
-        headerAction: {
-          fontSize: 13,
-          fontWeight: "500",
-          color: colors.secondaryText,
         },
         listContent: {
           paddingBottom: 8,
@@ -178,13 +154,6 @@ export const CountrySelector = ({
 
   return (
     <View style={styles.container}>
-      <View style={styles.headerRow}>
-        <Text style={styles.headerTitle}>{TITLE_LABEL}</Text>
-        <Pressable onPress={onCancel}>
-          <Text style={styles.headerAction}>{CANCEL_LABEL}</Text>
-        </Pressable>
-      </View>
-
       <FlatList
         data={countries}
         keyExtractor={keyExtractor}

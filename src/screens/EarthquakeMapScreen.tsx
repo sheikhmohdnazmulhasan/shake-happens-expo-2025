@@ -202,7 +202,7 @@ export const EarthquakeMapScreen = (): ReactElement => {
   const activeCountryLabel = manualCountry?.name ?? countryLabel;
 
   const handleOpenCountrySelector = useCallback(() => {
-    setIsSelectingCountry(true);
+    setIsSelectingCountry((previous) => !previous);
   }, []);
 
   const handleCountrySelected = useCallback(
@@ -227,10 +227,6 @@ export const EarthquakeMapScreen = (): ReactElement => {
     },
     [mapDefaultZoomDelta]
   );
-
-  const handleCloseCountrySelector = useCallback(() => {
-    setIsSelectingCountry(false);
-  }, []);
 
   return (
     <View style={styles.container}>
@@ -272,10 +268,7 @@ export const EarthquakeMapScreen = (): ReactElement => {
         ) : null}
 
         {isSelectingCountry ? (
-          <CountrySelector
-            onSelectCountry={handleCountrySelected}
-            onCancel={handleCloseCountrySelector}
-          />
+          <CountrySelector onSelectCountry={handleCountrySelected} />
         ) : (
           <EarthquakeList
             earthquakes={earthquakes}
