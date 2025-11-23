@@ -7,6 +7,7 @@
 import React, {
   memo,
   useCallback,
+  useMemo,
   type ReactElement,
   type ReactNode,
 } from "react";
@@ -20,6 +21,7 @@ import {
 } from "react-native";
 import type { Earthquake } from "../models/earthquakes";
 import { formatLocalDateTime } from "../utils/dateTime";
+import { useAppTheme } from "../hooks/useAppTheme";
 
 const NO_EARTHQUAKES_LABEL = "No recent earthquakes detected in Bangladesh.";
 const UNKNOWN_MAGNITUDE_LABEL = "M N/A";
@@ -76,6 +78,48 @@ const EarthquakeListItem = ({
 
   const timeLabel = formatLocalDateTime(earthquake.occurredAt);
 
+  const { colors } = useAppTheme();
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        itemContainer: {
+          paddingHorizontal: 12,
+          paddingVertical: 8,
+          borderBottomWidth: StyleSheet.hairlineWidth,
+          borderBottomColor: colors.border,
+        },
+        itemSelected: {
+          backgroundColor: colors.listItemSelected,
+        },
+        itemPressed: {
+          backgroundColor: colors.listItemPressedOverlay,
+        },
+        itemHeaderRow: {
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginBottom: 4,
+        },
+        itemTitle: {
+          flex: 1,
+          marginRight: 8,
+          fontSize: 14,
+          fontWeight: "600",
+          color: colors.primaryText,
+        },
+        itemMagnitude: {
+          fontSize: 13,
+          fontWeight: "500",
+          color: colors.secondaryText,
+        },
+        itemTime: {
+          fontSize: 12,
+          color: colors.secondaryText,
+        },
+      }),
+    [colors]
+  );
+
   return (
     <Pressable
       onPress={onPress ? () => onPress(earthquake) : undefined}
@@ -103,6 +147,65 @@ const EarthquakeListComponent = ({
   selectedEarthquakeId,
   onSelectEarthquake,
 }: EarthquakeListProps): ReactElement => {
+  const { colors } = useAppTheme();
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        listContent: {
+          paddingVertical: 8,
+        },
+        emptyListContent: {
+          flexGrow: 1,
+          alignItems: "center",
+          justifyContent: "center",
+          paddingHorizontal: 12,
+          paddingVertical: 8,
+        },
+        itemContainer: {
+          paddingHorizontal: 12,
+          paddingVertical: 8,
+          borderBottomWidth: StyleSheet.hairlineWidth,
+          borderBottomColor: colors.border,
+        },
+        itemSelected: {
+          backgroundColor: colors.listItemSelected,
+        },
+        itemPressed: {
+          backgroundColor: colors.listItemPressedOverlay,
+        },
+        itemHeaderRow: {
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginBottom: 4,
+        },
+        itemTitle: {
+          flex: 1,
+          marginRight: 8,
+          fontSize: 14,
+          fontWeight: "600",
+          color: colors.primaryText,
+        },
+        itemMagnitude: {
+          fontSize: 13,
+          fontWeight: "500",
+          color: colors.secondaryText,
+        },
+        itemTime: {
+          fontSize: 12,
+          color: colors.secondaryText,
+        },
+        emptyContainer: {
+          alignItems: "center",
+        },
+        emptyText: {
+          fontSize: 13,
+          color: colors.secondaryText,
+          textAlign: "center",
+        },
+      }),
+    [colors]
+  );
   const keyExtractor = useCallback((item: Earthquake): string => item.id, []);
 
   const renderItem = useCallback<ListRenderItem<Earthquake>>(
@@ -138,57 +241,3 @@ const EarthquakeListComponent = ({
 };
 
 export const EarthquakeList = memo(EarthquakeListComponent);
-
-const styles = StyleSheet.create({
-  listContent: {
-    paddingVertical: 8,
-  },
-  emptyListContent: {
-    flexGrow: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  itemContainer: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "#ddd",
-  },
-  itemSelected: {
-    backgroundColor: "#eef6ff",
-  },
-  itemPressed: {
-    opacity: 0.8,
-  },
-  itemHeaderRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 4,
-  },
-  itemTitle: {
-    flex: 1,
-    marginRight: 8,
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  itemMagnitude: {
-    fontSize: 13,
-    fontWeight: "500",
-    color: "#444",
-  },
-  itemTime: {
-    fontSize: 12,
-    color: "#666",
-  },
-  emptyContainer: {
-    alignItems: "center",
-  },
-  emptyText: {
-    fontSize: 13,
-    color: "#666",
-    textAlign: "center",
-  },
-});

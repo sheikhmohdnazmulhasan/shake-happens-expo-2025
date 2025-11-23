@@ -18,6 +18,7 @@ import { useEarthquakesPolling } from "../hooks/useEarthquakesPolling";
 import { EarthquakeList } from "../components/EarthquakeList";
 import { useUserLocationRegion } from "../hooks/useUserLocationRegion";
 import type { Earthquake } from "../models/earthquakes";
+import { useAppTheme } from "../hooks/useAppTheme";
 
 const LOADING_LABEL = "Loading earthquakes...";
 
@@ -104,6 +105,68 @@ export const EarthquakeMapScreen = (): ReactElement => {
     }
   }, [selectedEarthquakeId]);
 
+  const { colors } = useAppTheme();
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        container: {
+          flex: 1,
+          backgroundColor: colors.background,
+        },
+        mapContainer: {
+          flex: 2,
+        },
+        map: {
+          flex: 1,
+        },
+        listContainer: {
+          flex: 1,
+          borderTopWidth: StyleSheet.hairlineWidth,
+          borderTopColor: colors.border,
+          backgroundColor: colors.surface,
+        },
+        regionHeader: {
+          paddingHorizontal: 12,
+          paddingVertical: 6,
+          borderBottomWidth: StyleSheet.hairlineWidth,
+          borderBottomColor: colors.border,
+          backgroundColor: colors.surfaceAlt,
+        },
+        regionHeaderText: {
+          fontSize: 12,
+          color: colors.secondaryText,
+        },
+        loadingOverlay: {
+          position: "absolute",
+          left: 0,
+          right: 0,
+          top: 0,
+          bottom: 0,
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: colors.mapLoadingOverlay,
+        },
+        loadingText: {
+          marginTop: 8,
+          color: colors.primaryText,
+        },
+        errorBanner: {
+          position: "absolute",
+          left: 0,
+          right: 0,
+          bottom: 0,
+          paddingHorizontal: 12,
+          paddingVertical: 8,
+          backgroundColor: colors.errorBackground,
+        },
+        errorText: {
+          color: colors.errorText,
+          textAlign: "center",
+        },
+      }),
+    [colors]
+  );
+
   return (
     <View style={styles.container}>
       <View style={styles.mapContainer}>
@@ -163,58 +226,3 @@ export const EarthquakeMapScreen = (): ReactElement => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  mapContainer: {
-    flex: 2,
-  },
-  map: {
-    flex: 1,
-  },
-  listContainer: {
-    flex: 1,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: "#ddd",
-    backgroundColor: "#fff",
-  },
-  regionHeader: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "#eee",
-    backgroundColor: "#fafafa",
-  },
-  regionHeaderText: {
-    fontSize: 12,
-    color: "#555",
-  },
-  loadingOverlay: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.3)",
-  },
-  loadingText: {
-    marginTop: 8,
-  },
-  errorBanner: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 0,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    backgroundColor: "#ffdddd",
-  },
-  errorText: {
-    color: "#a80000",
-    textAlign: "center",
-  },
-});
