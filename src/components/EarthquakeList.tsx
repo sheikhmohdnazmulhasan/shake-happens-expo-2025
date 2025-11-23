@@ -12,6 +12,7 @@ import React, {
 } from "react";
 import {
   FlatList,
+  Pressable,
   StyleSheet,
   Text,
   View,
@@ -55,10 +56,12 @@ type EarthquakeListProps = {
 
 type EarthquakeListItemProps = {
   earthquake: Earthquake;
+  onPress?: (earthquake: Earthquake) => void;
 };
 
 const EarthquakeListItem = ({
   earthquake,
+  onPress,
 }: EarthquakeListItemProps): ReactElement => {
   const magnitudeLabel =
     earthquake.magnitude != null
@@ -70,7 +73,10 @@ const EarthquakeListItem = ({
   const timeLabel = formatLocalDateTime(earthquake.occurredAt);
 
   return (
-    <View style={styles.itemContainer}>
+    <Pressable
+      onPress={onPress ? () => onPress(earthquake) : undefined}
+      style={styles.itemContainer}
+    >
       <View style={styles.itemHeaderRow}>
         <Text style={styles.itemTitle} numberOfLines={1}>
           {earthquake.place}
@@ -80,18 +86,23 @@ const EarthquakeListItem = ({
         </Text>
       </View>
       <Text style={styles.itemTime}>{timeLabel}</Text>
-    </View>
+    </Pressable>
   );
 };
 
 const EarthquakeListComponent = ({
   earthquakes,
-}: EarthquakeListProps): ReactElement => {
+  onSelectEarthquake,
+}: EarthquakeListProps & {
+  onSelectEarthquake?: (earthquake: Earthquake) => void;
+}): ReactElement => {
   const keyExtractor = useCallback((item: Earthquake): string => item.id, []);
 
   const renderItem = useCallback<ListRenderItem<Earthquake>>(
-    ({ item }) => <EarthquakeListItem earthquake={item} />,
-    []
+    ({ item }) => (
+      <EarthquakeListItem earthquake={item} onPress={onSelectEarthquake} />
+    ),
+    [onSelectEarthquake]
   );
 
   const renderEmptyComponent = useCallback((): ReactNode => {

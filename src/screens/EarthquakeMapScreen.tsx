@@ -4,7 +4,7 @@
  * Top-level screen that renders a map and displays earthquakes as markers.
  * Uses the polling hook to keep data up to date with the USGS API.
  */
-import React, { useMemo, type ReactElement } from "react";
+import React, { useMemo, useRef, useCallback, type ReactElement } from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import MapView, { Marker, type Region } from "react-native-maps";
 import { getAppConfig } from "../config/appConfig";
@@ -35,6 +35,8 @@ export const EarthquakeMapScreen = (): ReactElement => {
     boundingBox: boundingBox ?? undefined,
   });
 
+  const mapRef = useRef<MapView | null>(null);
+
   const initialRegion: Region = useMemo(() => {
     const latitude = centerLatitude ?? mapDefaultLatitude;
     const longitude = centerLongitude ?? mapDefaultLongitude;
@@ -53,10 +55,33 @@ export const EarthquakeMapScreen = (): ReactElement => {
     mapDefaultZoomDelta,
   ]);
 
+  const handleSelectEarthquake = useCallback(
+    (quake: { latitude: number; longitude: number }) => {
+      if (!mapRef.current) {
+        return;
+      }
+
+      if (quake.latitude == null || quake.longitude == null) {
+        return;
+      }
+
+      mapRef.current.animateToRegion(
+        {
+          latitude: quake.latitude,
+          longitude: quake.longitude,
+          latitudeDelta: mapDefaultZoomDelta / 5,
+          longitudeDelta: mapDefaultZoomDelta / 5,
+        },
+        500
+      );
+    },
+    [mapDefaultZoomDelta]
+  );
+
   return (
     <View style={styles.container}>
       <View style={styles.mapContainer}>
-        <MapView style={styles.map} initialRegion={initialRegion}>
+        <MapView ref={mapRef} style={styles.map} initialRegion={initialRegion}>
           {earthquakes.map((quake) => (
             <Marker
               key={quake.id}
@@ -83,7 +108,10 @@ export const EarthquakeMapScreen = (): ReactElement => {
             </Text>
           </View>
         ) : null}
-        <EarthquakeList earthquakes={earthquakes} />
+        <EarthquakeList
+          earthquakes={earthquakes}
+          onSelectEarthquake={handleSelectEarthquake}
+        />
       </View>
 
       {isEarthquakesLoading || isLocationLoading ? (
