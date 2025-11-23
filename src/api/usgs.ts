@@ -43,7 +43,8 @@ export const fetchEarthquakes = async ({
   startTimeIso,
   endTimeIso,
 }: FetchEarthquakesArgs = {}): Promise<Earthquake[]> => {
-  const { usgsApiBaseUrl, defaultMinMagnitude } = getAppConfig();
+  const { usgsApiBaseUrl, defaultMinMagnitude, bangladeshBoundingBox } =
+    getAppConfig();
 
   const params = new URLSearchParams({
     format: "geojson",
@@ -51,6 +52,12 @@ export const fetchEarthquakes = async ({
     limit: String(limit),
     minmagnitude: String(minMagnitude ?? defaultMinMagnitude),
   });
+
+  // Restrict results to the Bangladesh region using a bounding box.
+  params.append("minlatitude", String(bangladeshBoundingBox.minLatitude));
+  params.append("maxlatitude", String(bangladeshBoundingBox.maxLatitude));
+  params.append("minlongitude", String(bangladeshBoundingBox.minLongitude));
+  params.append("maxlongitude", String(bangladeshBoundingBox.maxLongitude));
 
   if (startTimeIso) {
     params.append("starttime", startTimeIso);

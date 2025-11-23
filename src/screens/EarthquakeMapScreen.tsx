@@ -6,9 +6,10 @@
  */
 import React, { useMemo, type ReactElement } from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
-import MapView, { Marker, PROVIDER_GOOGLE, Region } from "react-native-maps";
+import MapView, { Marker, type Region } from "react-native-maps";
 import { getAppConfig } from "../config/appConfig";
 import { useEarthquakesPolling } from "../hooks/useEarthquakesPolling";
+import { EarthquakeList } from "../components/EarthquakeList";
 
 const LOADING_LABEL = "Loading earthquakes...";
 
@@ -30,27 +31,29 @@ export const EarthquakeMapScreen = (): ReactElement => {
 
   return (
     <View style={styles.container}>
-      <MapView
-        style={styles.map}
-        provider={PROVIDER_GOOGLE}
-        initialRegion={initialRegion}
-      >
-        {earthquakes.map((quake) => (
-          <Marker
-            key={quake.id}
-            coordinate={{
-              latitude: quake.latitude,
-              longitude: quake.longitude,
-            }}
-            title={quake.place}
-            description={
-              quake.magnitude != null
-                ? `M ${quake.magnitude.toFixed(1)}`
-                : undefined
-            }
-          />
-        ))}
-      </MapView>
+      <View style={styles.mapContainer}>
+        <MapView style={styles.map} initialRegion={initialRegion}>
+          {earthquakes.map((quake) => (
+            <Marker
+              key={quake.id}
+              coordinate={{
+                latitude: quake.latitude,
+                longitude: quake.longitude,
+              }}
+              title={quake.place}
+              description={
+                quake.magnitude != null
+                  ? `M ${quake.magnitude.toFixed(1)}`
+                  : undefined
+              }
+            />
+          ))}
+        </MapView>
+      </View>
+
+      <View style={styles.listContainer}>
+        <EarthquakeList earthquakes={earthquakes} />
+      </View>
 
       {isLoading ? (
         <View style={styles.loadingOverlay}>
@@ -72,8 +75,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  mapContainer: {
+    flex: 2,
+  },
   map: {
     flex: 1,
+  },
+  listContainer: {
+    flex: 1,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: "#ddd",
+    backgroundColor: "#fff",
   },
   loadingOverlay: {
     position: "absolute",

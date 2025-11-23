@@ -13,15 +13,31 @@ type AppExtraConfig = {
   mapDefaultLatitude: number;
   mapDefaultLongitude: number;
   mapDefaultZoomDelta: number;
+  bangladeshBoundingBox: {
+    minLatitude: number;
+    maxLatitude: number;
+    minLongitude: number;
+    maxLongitude: number;
+  };
 };
 
 const DEFAULT_CONFIG: AppExtraConfig = {
   usgsApiBaseUrl: "https://earthquake.usgs.gov/fdsnws/event/1",
-  defaultMinMagnitude: 3,
+  // Include even very small earthquakes by default.
+  defaultMinMagnitude: 0,
   defaultPollIntervalMs: 30_000,
-  mapDefaultLatitude: 0,
-  mapDefaultLongitude: 0,
-  mapDefaultZoomDelta: 60,
+  // Approximate center of Bangladesh.
+  mapDefaultLatitude: 23.7,
+  mapDefaultLongitude: 90.3,
+  // Smaller delta to focus on Bangladesh region.
+  mapDefaultZoomDelta: 5,
+  // Rough bounding box for Bangladesh region for API filtering.
+  bangladeshBoundingBox: {
+    minLatitude: 20.5,
+    maxLatitude: 26.7,
+    minLongitude: 88.0,
+    maxLongitude: 92.7,
+  },
 };
 
 export const getAppConfig = (): AppExtraConfig => {
