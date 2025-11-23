@@ -79,7 +79,7 @@ export const EarthquakeMapScreen = (): ReactElement => {
         {countryLabel ? (
           <View style={styles.regionHeader}>
             <Text style={styles.regionHeaderText}>
-              Showing earthquakes near {countryLabel}
+              Showing earthquakes in and around {countryLabel}
             </Text>
           </View>
         ) : null}

@@ -7,6 +7,7 @@
  */
 import { useEffect, useState } from "react";
 import * as Location from "expo-location";
+import { getAppConfig } from "../config/appConfig";
 import { logError, logInfo } from "../utils/logger";
 
 const LOCATION_PERMISSION_DENIED_MESSAGE =
@@ -81,7 +82,7 @@ export const useUserLocationRegion = ({
         const lonDelta =
           longitudeDeltaDegrees ?? DEFAULT_LONGITUDE_DELTA_DEGREES;
 
-        const calculatedBoundingBox: BoundingBox = {
+        let calculatedBoundingBox: BoundingBox = {
           minLatitude: latitude - latDelta,
           maxLatitude: latitude + latDelta,
           minLongitude: longitude - lonDelta,
@@ -101,6 +102,18 @@ export const useUserLocationRegion = ({
           }
         } catch (geocodeError) {
           logError("Reverse geocoding failed", geocodeError);
+        }
+
+        // If we know about this country, prefer a full-country bounding box
+        // instead of a small box around the user.
+        if (derivedCountryLabel === "Bangladesh") {
+          const { bangladeshBoundingBox } = getAppConfig();
+          calculatedBoundingBox = {
+            minLatitude: bangladeshBoundingBox.minLatitude,
+            maxLatitude: bangladeshBoundingBox.maxLatitude,
+            minLongitude: bangladeshBoundingBox.minLongitude,
+            maxLongitude: bangladeshBoundingBox.maxLongitude,
+          };
         }
 
         if (!isCancelled) {
