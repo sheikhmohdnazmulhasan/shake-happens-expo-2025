@@ -19,6 +19,8 @@ type AppExtraConfig = {
     minLongitude: number;
     maxLongitude: number;
   };
+  notificationRegistrationUrl?: string;
+  significantMagnitudeThreshold: number;
 };
 
 const DEFAULT_CONFIG: AppExtraConfig = {
@@ -38,6 +40,7 @@ const DEFAULT_CONFIG: AppExtraConfig = {
     minLongitude: 88.0,
     maxLongitude: 92.7,
   },
+  significantMagnitudeThreshold: 4.5,
 };
 
 export const getAppConfig = (): AppExtraConfig => {
