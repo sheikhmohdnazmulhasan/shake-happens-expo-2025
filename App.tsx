@@ -5,15 +5,18 @@
  * to the screen layer so it remains easy to test and maintain.
  */
 import React, { type ReactElement } from "react";
-import { SafeAreaView, StatusBar, StyleSheet } from "react-native";
+import { StatusBar, StyleSheet } from "react-native";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { EarthquakeMapScreen } from "./src/screens/EarthquakeMapScreen";
 
 const App = (): ReactElement => {
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" />
-      <EarthquakeMapScreen />
-    </SafeAreaView>
+    <SafeAreaProvider>
+      <SafeAreaView style={styles.container}>
+        <StatusBar barStyle="dark-content" />
+        <EarthquakeMapScreen />
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 };
 
