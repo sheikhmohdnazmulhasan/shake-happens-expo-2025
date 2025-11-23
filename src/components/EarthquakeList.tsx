@@ -117,7 +117,7 @@ const EarthquakeListItem = ({
           color: colors.secondaryText,
         },
       }),
-    [colors]
+    [colors],
   );
 
   return (
@@ -204,7 +204,7 @@ const EarthquakeListComponent = ({
           textAlign: "center",
         },
       }),
-    [colors]
+    [colors],
   );
   const keyExtractor = useCallback((item: Earthquake): string => item.id, []);
 
@@ -216,7 +216,7 @@ const EarthquakeListComponent = ({
         onPress={onSelectEarthquake}
       />
     ),
-    [onSelectEarthquake, selectedEarthquakeId]
+    [onSelectEarthquake, selectedEarthquakeId],
   );
 
   const renderEmptyComponent = useCallback((): ReactNode => {

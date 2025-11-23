@@ -113,12 +113,12 @@ export const CountrySelector = ({
           color: colors.secondaryText,
         },
       }),
-    [colors]
+    [colors],
   );
 
   const keyExtractor = useCallback(
     (item: CountryOption): string => item.code,
-    []
+    [],
   );
 
   const renderItem = useCallback<ListRenderItem<CountryOption>>(
@@ -130,7 +130,7 @@ export const CountrySelector = ({
         <Text style={styles.itemText}>{item.name}</Text>
       </Pressable>
     ),
-    [onSelectCountry, styles]
+    [onSelectCountry, styles],
   );
 
   const renderEmpty = useCallback((): ReactElement => {

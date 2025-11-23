@@ -40,7 +40,7 @@ export const EarthquakeMapScreen = (): ReactElement => {
   >(null);
   const [isSelectingCountry, setIsSelectingCountry] = useState<boolean>(false);
   const [manualCountry, setManualCountry] = useState<CountryOption | null>(
-    null
+    null,
   );
 
   const {
@@ -61,8 +61,8 @@ export const EarthquakeMapScreen = (): ReactElement => {
             minLongitude: manualCountry.longitude - 7,
             maxLongitude: manualCountry.longitude + 7,
           }
-        : boundingBox ?? undefined,
-    [manualCountry, boundingBox]
+        : (boundingBox ?? undefined),
+    [manualCountry, boundingBox],
   );
 
   const {
@@ -117,10 +117,10 @@ export const EarthquakeMapScreen = (): ReactElement => {
           latitudeDelta: mapDefaultZoomDelta / 8,
           longitudeDelta: mapDefaultZoomDelta / 8,
         },
-        500
+        500,
       );
     },
-    [mapDefaultZoomDelta]
+    [mapDefaultZoomDelta],
   );
 
   const handleRegionChangeComplete = useCallback(() => {
@@ -203,7 +203,7 @@ export const EarthquakeMapScreen = (): ReactElement => {
           textAlign: "center",
         },
       }),
-    [colors]
+    [colors],
   );
 
   const activeCountryLabel = manualCountry?.name ?? countryLabel;
@@ -230,10 +230,10 @@ export const EarthquakeMapScreen = (): ReactElement => {
           latitudeDelta: mapDefaultZoomDelta,
           longitudeDelta: mapDefaultZoomDelta,
         },
-        500
+        500,
       );
     },
-    [mapDefaultZoomDelta]
+    [mapDefaultZoomDelta],
   );
 
   useEffect(() => {
@@ -261,7 +261,7 @@ export const EarthquakeMapScreen = (): ReactElement => {
         latitudeDelta: mapDefaultZoomDelta / 8,
         longitudeDelta: mapDefaultZoomDelta / 8,
       },
-      500
+      500,
     );
   }, [earthquakes, mapDefaultZoomDelta]);
 

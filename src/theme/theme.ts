@@ -61,7 +61,7 @@ const DARK_THEME: AppTheme = {
 };
 
 export const getThemeForScheme = (
-  scheme: "light" | "dark" | null | undefined
+  scheme: "light" | "dark" | null | undefined,
 ): AppTheme => {
   if (scheme === "dark") {
     return DARK_THEME;

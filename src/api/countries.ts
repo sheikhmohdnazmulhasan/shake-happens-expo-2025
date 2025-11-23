@@ -29,7 +29,7 @@ export const fetchCountries = async (): Promise<CountryOption[]> => {
 
   try {
     response = await fetch(
-      "https://restcountries.com/v3.1/all?fields=cca2,name,latlng"
+      "https://restcountries.com/v3.1/all?fields=cca2,name,latlng",
     );
   } catch (error) {
     logError("Network error fetching countries", error);
@@ -58,7 +58,7 @@ export const fetchCountries = async (): Promise<CountryOption[]> => {
       (country) =>
         country.name?.common &&
         Array.isArray(country.latlng) &&
-        country.latlng.length === 2
+        country.latlng.length === 2,
     )
     .map<CountryOption>((country) => ({
       code: country.cca2 ?? country.name?.common ?? "??",
